@@ -1,4 +1,6 @@
-# CannyLSのissue?を再現する
+# CannyLSのissue28を再現する
+
+issueそのものについては [issue28](https://github.com/frugalos/cannyls/issues/28) を参照してください。
 
 ## 手順
 ```bash
