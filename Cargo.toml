@@ -1,0 +1,10 @@
+[package]
+name = "get_unexpected_data"
+version = "0.1.0"
+authors = ["yuuya uezato <yuuya_uezato@dwango.co.jp>"]
+edition = "2018"
+
+[dependencies]
+cannyls = { git = "https://github.com/frugalos/cannyls" } # for v0.9.3
+structopt = "0.2"
+trackable = "^0.2.21"
