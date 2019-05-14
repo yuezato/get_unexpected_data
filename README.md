@@ -21,15 +21,15 @@ Furthermore, the read data `foo` is not `hoge`.
 
 ## メッセージの説明
 1. `phase=1`では以下のことを行う:
-    a. `lump_id1`に"hoge"をputする。
-    b. この段階でjournalをdiskに同期する。
-    c. `lump_id1`をdeleteする。
-    d. `lump_id2`に"foo"をputする。
-    e. `mem::forget`を呼び出して、プロセスのクラッシュを模倣する。
+    1. `lump_id1`に"hoge"をputする。
+    2. この段階でjournalをdiskに同期する。
+    3. `lump_id1`をdeleteする。
+    4. `lump_id2`に"foo"をputする。
+    5. `mem::forget`を呼び出して、プロセスのクラッシュを模倣する。
 2. `phase=2`では以下のことを行う:
-    a. `lump_id1`をgetしようとする。
-    b. 削除した筈の`lump_id1`からデータが読み込める。
-    c. 読み込むデータは"hoge"ではなく"foo"である。
+    1. `lump_id1`をgetしようとする。
+    2. 削除した筈の`lump_id1`からデータが読み込める。
+    3. 読み込むデータは"hoge"ではなく"foo"である。
 
 ## 原因
 * `lump_id1`をdeleteした段階では、deleteした情報はdiskに永続化されていない。
