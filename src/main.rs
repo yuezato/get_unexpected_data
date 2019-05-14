@@ -8,7 +8,7 @@ use structopt::StructOpt;
 use cannyls::block::BlockSize;
 use cannyls::lump::*;
 use cannyls::nvm::FileNvm;
-use cannyls::storage::Storage;
+use cannyls::storage::{Storage, StorageBuilder};
 use cannyls::Error;
 
 #[derive(StructOpt, Debug)]
@@ -30,7 +30,7 @@ fn main() -> Result<(), Error> {
             path,
             BlockSize::min().ceil_align(1024 * 1024)
         ))?;
-        let mut storage = track!(Storage::create(nvm))?;
+        let mut storage = track!(StorageBuilder::new().create(nvm))?;
 
         let lump_data1 = track!(storage.allocate_lump_data_with_bytes(b"hoge"))?;
 
@@ -54,13 +54,16 @@ fn main() -> Result<(), Error> {
         println!("try to read a datum from lump_id1(= {:?}).", lump_id1);
         let v = track!(storage.get(&lump_id1))?;
         if let Some(v) = v {
+            let read_string = String::from_utf8_lossy(v.as_bytes());
+            println!("You read {} from lump_id1 !", read_string);
             println!("We deleted lump_id1(= {:?}); however, we can read a datum from lump_id1.", lump_id1);
-            println!(
-                "Furthermore, the read data `{}` is not `hoge`.",
-                String::from_utf8_lossy(v.as_bytes())
-            );
+            if read_string == "hoge" {
+                println!("This means that the delete operation for lump_id1 has not been synced to your disk.");
+            } else {
+                println!("Furthermore, bizarrely, the read data `{}` is not `hoge`.", read_string);
+            }
         } else {
-            panic!("unexpected behaviour for v0.9.3");
+            panic!("unexpected behaviour");
         }
         Ok(())
     } else {
