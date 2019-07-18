@@ -8,7 +8,7 @@ use structopt::StructOpt;
 use cannyls::block::BlockSize;
 use cannyls::lump::*;
 use cannyls::nvm::FileNvm;
-use cannyls::storage::Storage;
+use cannyls::storage::StorageBuilder;
 use cannyls::Error;
 
 #[derive(StructOpt, Debug)]
@@ -30,7 +30,9 @@ fn main() -> Result<(), Error> {
             path,
             BlockSize::min().ceil_align(1024 * 1024)
         ))?;
-        let mut storage = track!(Storage::create(nvm))?;
+        let mut builder = StorageBuilder::new();
+        builder.enable_safe_release_mode();
+        let mut storage = track!(builder.create(nvm))?;
 
         let lump_data1 = track!(storage.allocate_lump_data_with_bytes(b"hoge"))?;
 
@@ -49,16 +51,20 @@ fn main() -> Result<(), Error> {
         Ok(())
     } else if opt.phase == 2 {
         let nvm = track!(FileNvm::open(path))?;
-        let mut storage = track!(Storage::open(nvm))?;
+        let mut builder = StorageBuilder::new();
+        builder.enable_safe_release_mode();
+        let mut storage = track!(builder.open(nvm))?;
 
         println!("try to read a datum from lump_id1(= {:?}).", lump_id1);
         let v = track!(storage.get(&lump_id1))?;
         if let Some(v) = v {
             println!("We deleted lump_id1(= {:?}); however, we can read a datum from lump_id1.", lump_id1);
-            println!(
-                "Furthermore, the read data `{}` is not `hoge`.",
-                String::from_utf8_lossy(v.as_bytes())
-            );
+            let datam = String::from_utf8_lossy(v.as_bytes());
+            if datam != "hoge" {
+                println!("Furthermore, the read data `{}` is not `hoge`.", datam);
+            } else {
+                println!("The read data is `hoge`");
+            }
         } else {
             panic!("unexpected behaviour for v0.9.3");
         }
